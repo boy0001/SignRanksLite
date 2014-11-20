@@ -52,33 +52,33 @@ public class ReqHandler {
         return null;
     }
     
-    public static Integer validateRequirements(Player player, ArrayList<String> lines) {
+    public static String validateRequirements(Player player, ArrayList<String> lines) {
         for (int i = 0; i < lines.size(); i++) {
             Boolean result = isValidRequirement(player, lines.get(i));
             if (result == null) {
-                return i;
+                return lines.get(i);
             }
             else if (result == false) {
-                return i;
+                return lines.get(i);
             }
         }
         return null;
     }
 
-    public static Integer takeRequirements(Player player, ArrayList<String> lines) {
+    public static String takeRequirements(Player player, ArrayList<String> lines) {
         for (int i = 0; i < lines.size(); i++) {
             Boolean result = hasRequirement(player, lines.get(i));
             if (result == null) {
                 MainUtil.sendMessage(player, C.INVALID_LINE, i+"", lines.get(i));
             }
             else if (result == false) {
-                return i;
+                return lines.get(i);
             }
         }
         return null;
     }
     
-    public static ArrayList<String> getRequirements(Player player, Sign[] signs) {
+    public static ArrayList<String> getLines(Player player, Sign[] signs) {
         ArrayList<String> lines = new ArrayList<String>();
         int index = 0;
         for (Sign sign: signs) {

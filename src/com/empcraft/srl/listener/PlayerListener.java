@@ -3,6 +3,7 @@ package com.empcraft.srl.listener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,6 +25,7 @@ import com.empcraft.srl.C;
 import com.empcraft.srl.object.AbstractSign;
 import com.empcraft.srl.object.AbstractSignInstance;
 import com.empcraft.srl.object.Requirement;
+import com.empcraft.srl.signs.Extend;
 import com.empcraft.srl.util.MainUtil;
 import com.empcraft.srl.util.ReqHandler;
 import com.empcraft.srl.util.SignHandler;
@@ -39,7 +41,10 @@ public class PlayerListener implements Listener {
             if (line == null) {
                 return null;
             }
-            AbstractSign as = SignHandler.getSign(line);
+            if (line.startsWith("[") && line.endsWith("]")) {
+                line = line.substring(1,line.length()-1);
+            }
+            AbstractSign as = SignHandler.getSign(ChatColor.stripColor(MainUtil.colorize(line.toLowerCase())));
             return as;
         }
         else {
@@ -63,8 +68,47 @@ public class PlayerListener implements Listener {
         String line4 = event.getLine(3);
         AbstractSign as = getSign(block);
         
+        if (as == null) {
+            return;
+        }
+        
         if (!MainUtil.hasPermission(player, "signranks.create."+as.NAME)) {
-            
+            ArrayList<String> lines;
+            if (as instanceof Extend) {
+                Block b = player.getWorld().getBlockAt(block.getLocation().clone().add(0, 1, 0));
+                AbstractSign as2 = getSign(b);
+                if (as2 == null) {
+                    sign.setLine(0, "§4"+as.NAME);
+                    MainUtil.sendMessage(player, C.NO_PERM, "signranks.create."+as.NAME);
+                    sign.update();
+                    return;
+                }
+                else {
+                    lines = ReqHandler.getLines(player, new Sign[] {(Sign) b.getState(), sign});
+                }
+            }
+            else {
+                lines = ReqHandler.getLines(player, new Sign[] {sign});
+            }
+            String result = ReqHandler.validateRequirements(player, lines);
+            if (result == null)  {
+                sign.setLine(0, "§1"+as.NAME);
+                MainUtil.sendMessage(player, C.CREATE_SIGN, as.NAME);
+                sign.update();
+                return;
+            }
+            else {
+                sign.setLine(0, "§4"+as.NAME);
+                MainUtil.sendMessage(player, C.INVALID_REQUIREMENT, result, as.NAME);
+                sign.update();
+                return;
+            }
+        }
+        else {
+            sign.setLine(0, "§4"+as.NAME);
+            MainUtil.sendMessage(player, C.NO_PERM, "signranks.create."+as.NAME);
+            sign.update();
+            return;
         }
         
     }

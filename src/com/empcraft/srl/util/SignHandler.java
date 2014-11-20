@@ -19,7 +19,7 @@ public class SignHandler {
     }
     
     public static void registerSign(AbstractSign sign, boolean isProtected) {
-            signs.put(sign.NAME, sign);
+            signs.put(sign.NAME.toLowerCase(), sign);
             if (isProtected) {
                 protectedSigns.add(sign);
             }
